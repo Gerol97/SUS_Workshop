@@ -1,4 +1,6 @@
+/*
 #include<stdint.h>
+
 
 // Warteschleife
 void delay(void)
@@ -34,4 +36,34 @@ int main(void)
         *address_GPIO_DATA =  (0x00);
         delay();
     }
+}
+*/
+
+#include<stdint.h> // Definition des Typs "int"
+#include<stdbool.h> // Definition des Typs "bool"
+#include"inc/hw_memmap.h" // Definition der Registeradressen
+#include"inc/hw_types.h" // Definition der framework makros
+#include"driverlib/gpio.h"
+#include"driverlib/sysctl.h"
+
+void delay(void)
+{
+    uint32_t i=50000;
+    while(i) {i--;}
+}
+
+int main(void){
+
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
+    while(1){
+
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, 0xFF);
+        delay();
+
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, 0x00);
+        delay();
+    }
+
 }
