@@ -54,14 +54,18 @@ void delay(void)
 
 int main(void){
 
+    //Enable GPIO-Port F
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
 
+    //Set GPIO Pin 1, GPIO Pin 2, GPIO Pin 3 as Digital Output
     GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
     while(1){
 
+        //GPIO Pin 1, GPIO Pin 2, GPIO Pin 3 High
         GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, 0xFF);
         delay();
 
+        //GPIO Pin 1, GPIO Pin 2, GPIO Pin 3 Low
         GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, 0x00);
         delay();
     }
