@@ -57,24 +57,24 @@ void delay(void)
     while(i) {i--;}
 }
 
-int main(void){
-
-    //Enable GPIO-Port F
+int main(void)
+{
+    //Enable GPIO Port F
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
 
     //Set GPIO Pin 1, GPIO Pin 2, GPIO Pin 3 as Digital Output
-    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3);
-    while(1){
+    GPIOPinTypeGPIOOutput(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3);
 
+    while(1)
+    {
         //GPIO Pin 1, GPIO Pin 2, GPIO Pin 3 High
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, 0xFF);
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0xFF);
         delay();
 
         //GPIO Pin 1, GPIO Pin 2, GPIO Pin 3 Low
-        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3, 0x00);
+        GPIOPinWrite(GPIO_PORTF_BASE, GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3, 0x00);
         delay();
     }
-
 }
 */
 /*
@@ -99,25 +99,27 @@ void delay2(void)
     uint32_t k=500000;
     while(k) {k--;}
 }
-int main(void){
-
-    //Enable GPIO-Port B
+int main(void)
+{
+    //Enable GPIO Port B
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
 
     //Set GPIO Pin 1, GPIO Pin 2, GPIO Pin 3 as Digital Output
-    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
-    while(1){
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                          | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7);
 
+    while(1)
+    {
         //GPIO Pin 1, GPIO Pin 2, GPIO Pin 3 High
-        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, 0xFF);
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                     | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0xFF);
         delay2();
 
         //GPIO Pin 1, GPIO Pin 2, GPIO Pin 3 Low
-        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, 0x00);
-        delay1();
-                                                                                                GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_1, 0x00);
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                     | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0x00);
+        delay1();                                                                                                GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_1, 0x00);
     }
-
 }
 */
 /*
@@ -172,9 +174,9 @@ void clockSetup(void)
 
 void delay_ms(uint32_t waitTime)
 {
-    uint32_t systemTime_ms1=systemTime_ms;
+    uint32_t Time=systemTime_ms;
     while(1){
-        if(systemTime_ms1==(systemTime_ms-waitTime)){
+        if(Time==(systemTime_ms-waitTime)){
             break;
         }
     }
@@ -182,17 +184,21 @@ void delay_ms(uint32_t waitTime)
 
 int main(void)
 {
-    // /...initialisiere Ports und Pins.../
     systemTime_ms = 0;
     clockSetup();
-    //GPIO PORTB 0-7 werden als Ausgänge eingestellt
+    //Enable GPIO PORTB
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
+    //Set GPIO PORTB 0-7 as Digital Output
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                          | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7);
+
     while(1)
     {
-        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0xFF);
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                     | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0xFF);
         delay_ms(500);
-        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x00);
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                     | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0x00);
         delay_ms(500);
     }
 }
@@ -250,53 +256,58 @@ void clockSetup(void)
 
 void delay_ms(uint32_t waitTime)
 {
-        //Frequenz(1/ms) mal waitTime(ms) gleich dem einzustellenden Wert.
-        uint32_t waitPeriod=(waitTime*SysCtlClockGet()/1000);
-        while(waitPeriod)
-        {
-            waitPeriod--;
-        }
+    //Frequency(1/ms) times waitTime(ms) is equal to wait
+    uint32_t wait=(waitTime*SysCtlClockGet()/1000);
+    while(wait)
+    {
+        wait--;
+    }
 }
 
 void delay_us(uint32_t waitTime)
 {
-        //Frequenz(1/us) mal waitTime(us) gleich dem einzustellenden Wert.
-        uint32_t waitPeriod=(waitTime*SysCtlClockGet()/1000000);
-        uint32_t testperiod=4290000000;
-        while(testperiod)
-        {
-            waitPeriod--;
-        }
+    //Frequency(1/us) times waitTime(us) is equal to wait
+    uint32_t wait=(waitTime*SysCtlClockGet()/1000000);
+    uint32_t test=4290000000;
+    while(test)
+    {
+        wait--;
+    }
 }
 
 int main(void)
 {
-        //initialisiere Ports und Pins
-        //enable the GPIOB peripheral
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-        //enable the GPIOC peripheral
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
-        //set pin 7 as input with pull-up resistance.
-        GPIOPinTypeGPIOInput(GPIO_PORTC_BASE,GPIO_PIN_7);
-        GPIOPadConfigSet(GPIO_PORTC_BASE,GPIO_PIN_7,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
-        //set pin 7  as output
-        GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_7);
-        systemTime_ms = 0;
-        clockSetup();
-        while(1){
+    //Enable GPIO PORT B
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+    //Enable GPIO PORT C
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+    //Set Port C Pin 7 as input with pull-up resistance.
+    GPIOPinTypeGPIOInput(GPIO_PORTC_BASE,GPIO_PIN_7);
+    GPIOPadConfigSet(GPIO_PORTC_BASE,GPIO_PIN_7,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
+    //Set Port B Pin 7 as output
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_7);
+    systemTime_ms = 0;
+    clockSetup();
+
+    while(1)
+    {
         //Taster gedrueckt
-            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0x00);
-            if (GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_7)==0){
-                //auf Tastendruck reagieren
-                GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0xFF);
-            }
-            while (GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_7)==0){
-                // auf Öffnen des Tasters reagieren
-                if (GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_7)!=0){
-                    break;
-                }
+        GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0x00);
+
+        if (GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_7)==0)
+        {
+            //auf Tastendruck reagieren
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0xFF);
+        }
+        while (GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_7)==0)
+        {
+            // auf Öffnen des Tasters reagieren
+            if (GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_7)!=0)
+            {
+                break;
             }
         }
+    }
 }
 */
 /*
@@ -352,61 +363,63 @@ void clockSetup(void)
 
 void delay_ms(uint32_t waitTime)
 {
-        //Frequenz(1/ms) mal waitTime(ms) gleich dem einzustellenden Wert.
-        uint32_t waitPeriod=(waitTime*SysCtlClockGet()/1000);
-        while(waitPeriod)
-        {
-            waitPeriod--;
-        }
+    //Frequency(1/ms) times waitTime(ms) is equal to wait
+    uint32_t wait=(waitTime*SysCtlClockGet()/1000);
+    while(wait)
+    {
+        wait--;
+    }
 }
 
 void delay_us(uint32_t waitTime)
 {
-        //Frequenz(1/us) mal waitTime(us) gleich dem einzustellenden Wert.
-        uint32_t waitPeriod=(waitTime*SysCtlClockGet()/1000000);
-        uint32_t testperiod=4290000000;
-        while(testperiod)
-        {
-            waitPeriod--;
-        }
+    //Frequency(1/us) times waitTime(us) is equal to wait
+    uint32_t wait=(waitTime*SysCtlClockGet()/1000000);
+    uint32_t test=4290000000;
+    while(test)
+    {
+        wait--;
+    }
 }
 
 int main(void)
 {
-        //initialisiere Ports und Pins
-        //enable the GPIOB peripheral
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-        //enalbe the GPIOC peripheral
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
-        //enalbe the GPIOF peripheral
-        SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
-        //set pin 7 as input with pull-up resistance.
-        GPIOPinTypeGPIOInput(GPIO_PORTC_BASE,GPIO_PIN_7);
-        GPIOPadConfigSet(GPIO_PORTC_BASE,GPIO_PIN_7,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
-        //set GPIOF4 as input with pull-up resistance.
-        GPIOPinTypeGPIOInput(GPIO_PORTF_BASE,GPIO_PIN_4);
-        GPIOPadConfigSet(GPIO_PORTF_BASE,GPIO_PIN_4,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
-        //set pin 7  as output
-        GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_7);
-        systemTime_ms = 0;
-        clockSetup();
-        uint32_t number = 0;
-        while(1){
+    //Enable GPIO PORT B
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+    //Enable GPIO PORT C
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
+    //Enable GPIO PORT F
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
+    //Set Port C Pin 7 as input with pull-up resistance.
+    GPIOPinTypeGPIOInput(GPIO_PORTC_BASE,GPIO_PIN_7);
+    GPIOPadConfigSet(GPIO_PORTC_BASE,GPIO_PIN_7,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
+    //Set Port F Pin 4 as input with pull-up resistance.
+    GPIOPinTypeGPIOInput(GPIO_PORTF_BASE,GPIO_PIN_4);
+    GPIOPadConfigSet(GPIO_PORTF_BASE,GPIO_PIN_4,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
+    //Set Port B Pin 7 as output
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_7);
+    systemTime_ms = 0;
+    clockSetup();
 
-            //if switch is on add 1 to the number
-            if (GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_4)==0){
-                number++;
-            }
-            //if the number is an even number turn off the LED
-            if(number%2==0){
-                GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0x00);
-            }
-            //if the number is an odd number turn on the LED
-            else {
-                GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0xFF);
-            }
-
+    uint32_t number = 0;
+    while(1)
+    {
+        //if switch is on add 1 to the number
+        if (GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_4)==0)
+        {
+            number++;
         }
+        //if the number is an even number turn off the LED
+        if(number%2==0)
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0x00);
+        }
+        //if the number is an odd number turn on the LED
+        else
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0xFF);
+        }
+    }
 }
 */
 
@@ -462,15 +475,16 @@ void clockSetup(void)
 
 void delay_ms(uint32_t waitTime)
 {
-        //Frequenz(1/ms) mal waitTime(ms) gleich dem einzustellenden Wert.
-        uint32_t waitPeriod=(waitTime*SysCtlClockGet()/1000);
-        while(waitPeriod)
-        {
-            waitPeriod--;
-        }
+    //Frequency(1/ms) times waitTime(ms) is equal to wait
+    uint32_t wait=(waitTime*SysCtlClockGet()/1000);
+    while(wait)
+    {
+        wait--;
+    }
 }
 
 volatile uint32_t Wert=0x01;
+
 // Interruptroutine
 void ex_int_handler(void) {
     // delay, um Taster zu stabilisieren
@@ -484,14 +498,15 @@ void ex_int_handler(void) {
 void main(void)
 {
     clockSetup();
-    // Peripherie B,C aktivieren
+    // Peripherie aktivieren
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOF);
     SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
 
-    // set PB0-7 as outputs
-    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
+    // Set Port B Pin 0-7 as output
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                          | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7);
 
-    // Taster mit F und C Pullup
+    // Taster mit Pullup
     GPIOPinTypeGPIOInput(GPIO_PORTF_BASE,GPIO_PIN_4);
     GPIOPadConfigSet(GPIO_PORTF_BASE, GPIO_PIN_4, GPIO_STRENGTH_2MA, GPIO_PIN_TYPE_STD_WPU);
 
@@ -509,9 +524,11 @@ void main(void)
         {
             Wert=0x01;
         }
-        GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,Wert);
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                     | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, Wert);
         delay_ms(50);
-        GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x00);
+        GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2 | GPIO_PIN_3
+                     | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7, 0x00);
         delay_ms(50);
     }
 }
