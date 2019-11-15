@@ -115,6 +115,7 @@ int main(void){
         //GPIO Pin 1, GPIO Pin 2, GPIO Pin 3 Low
         GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7, 0x00);
         delay1();
+                                                                                                GPIOPinWrite(GPIO_PORTB_BASE, GPIO_PIN_1, 0x00);
     }
 
 }
@@ -273,21 +274,21 @@ int main(void)
         //initialisiere Ports und Pins
         //enable the GPIOB peripheral
         SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
-        //enalbe the GPIOC peripheral
+        //enable the GPIOC peripheral
         SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOC);
         //set pin 7 as input with pull-up resistance.
         GPIOPinTypeGPIOInput(GPIO_PORTC_BASE,GPIO_PIN_7);
         GPIOPadConfigSet(GPIO_PORTC_BASE,GPIO_PIN_7,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
-        //set pin 0 to 7  as output
-        GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
+        //set pin 7  as output
+        GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_7);
         systemTime_ms = 0;
         clockSetup();
         while(1){
         //Taster gedrueckt
-            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x00);
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0x00);
             if (GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_7)==0){
                 //auf Tastendruck reagieren
-                GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0xFF);
+                GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0xFF);
             }
             while (GPIOPinRead(GPIO_PORTC_BASE,GPIO_PIN_7)==0){
                 // auf Öffnen des Tasters reagieren
@@ -385,27 +386,30 @@ int main(void)
         //set GPIOF4 as input with pull-up resistance.
         GPIOPinTypeGPIOInput(GPIO_PORTF_BASE,GPIO_PIN_4);
         GPIOPadConfigSet(GPIO_PORTF_BASE,GPIO_PIN_4,GPIO_STRENGTH_2MA,GPIO_PIN_TYPE_STD_WPU);
-        //set pin 0 to 7  as output
-        GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
+        //set pin 7  as output
+        GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_7);
         systemTime_ms = 0;
         clockSetup();
+        uint32_t number = 0;
         while(1){
-        //Taster gedrueckt
-            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x00);
-            if (GPIOPinRead(GPIO_PORTF_BASE,GPIO_PIN_4)==0){
-                //auf Tastendruck reagieren
-                GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0xFF);
+
+            //if switch is on add 1 to the number
+            if (GPIOPinRead(GPIO_PORTF_BASE, GPIO_PIN_4)==0){
+                number++;
             }
-            while (GPIOPinRead(GPIO_PORTF_BASE,GPIO_PIN_4)==0){
-                // auf oeffnen des Tasters reagieren
-                if (GPIOPinRead(GPIO_PORTF_BASE,GPIO_PIN_4)!=0){
-                    break;
-                }
+            //if the number is an even number turn off the LED
+            if(number%2==0){
+                GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0x00);
             }
+            //if the number is an odd number turn on the LED
+            else {
+                GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_7,0xFF);
+            }
+
         }
 }
 */
-/*
+
 
 //AUFGABE 6.2==========================================================================================================================
 
@@ -509,6 +513,6 @@ void main(void)
 
     }
 }
-*/
+
 
 
