@@ -533,7 +533,7 @@ void main(void)
     }
 }
 */
-
+/*
 
 //AUFGABE 7.2==========================================================================================================================
 
@@ -647,35 +647,35 @@ void main(void)
 
         GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x00);
         delay_ms(20);
-        if (Widerstand>100&&Widerstand<=200)
+        if (Widerstand>100&&Widerstand<=300)
         {
             GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x01);
         }
-        else if(Widerstand>200&&Widerstand<=400)
+        else if(Widerstand>300&&Widerstand<=500)
         {
             GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x02);
         }
-        else if(Widerstand>400&&Widerstand<=800)
+        else if(Widerstand>500&&Widerstand<=1000)
         {
             GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x04);
         }
-        else if(Widerstand>800&&Widerstand<=1200)
+        else if(Widerstand>1000&&Widerstand<=3000)
         {
             GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x08);
         }
-        else if(Widerstand>1200&&Widerstand<=2000)
+        else if(Widerstand>3000&&Widerstand<=5000)
         {
             GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x10);
         }
-        else if(Widerstand>2000&&Widerstand<=5000)
+        else if(Widerstand>5000&&Widerstand<=9000)
         {
             GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x20);
         }
-        else if(Widerstand>5000&&Widerstand<=11000)
+        else if(Widerstand>9000&&Widerstand<=13000)
         {
             GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x40);
         }
-        else if(Widerstand>11000&&Widerstand<=16000)
+        else if(Widerstand>13000&&Widerstand<=20000)
         {
             GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x80);
         }
@@ -683,6 +683,98 @@ void main(void)
         delay_ms(20);
     }
 }
+*/
 
 
+//AUFGABE 8.1==========================================================================================================================
 
+#include <stdint.h>
+#include <stdbool.h>
+#include "inc/hw_memmap.h"
+#include "inc/hw_types.h"
+#include "driverlib/sysctl.h"
+#include "driverlib/adc.h"
+#include "driverlib/gpio.h"
+#include "driverlib/timer.h"
+
+// Makros
+#define FSAMPLE  44000
+#define BUFFER_SIZE 1000
+
+// globale Variable
+int32_t buffer_sample[BUFFER_SIZE];     //Quadratische Signale
+uint32_t i_sample = 0;
+int32_t buffer_sample_sum = 0;          // momentaner Pegel
+
+// Prototypen
+void ADC_int_handler(void);
+
+int main(void)
+{
+    // SystemClock konfigurieren
+    SysCtlClockSet(SYSCTL_SYSDIV_5|SYSCTL_USE_PLL|SYSCTL_OSC_MAIN|SYSCTL_XTAL_16MHZ);
+    uint32_t ui32Period = SysCtlClockGet()/FSAMPLE;
+
+    // Peripherie aktivieren
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
+
+    // GPIO konfigurieren
+    GPIOPinTypeADC(GPIO_PORTE_BASE,GPIO_PIN_2);
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7);
+
+    //Timer0 konfigurieren
+    TimerConfigure(TIMER0_BASE,TIMER_CFG_PERIODIC);
+    TimerLoadSet(TIMER0_BASE, TIMER_A, ui32Period - 1);
+    TimerControlTrigger(TIMER0_BASE,TIMER_A,true);
+    TimerEnable(TIMER0_BASE,TIMER_A);
+
+    // ADC konfigurieren
+    ADCClockConfigSet(ADC0_BASE,ADC_CLOCK_RATE_FULL,1);
+
+    ADCSequenceConfigure(ADC0_BASE, 3, ADC_TRIGGER_TIMER, 0);
+    ADCSequenceStepConfigure(ADC0_BASE, 3, 0, ADC_CTL_CH1|ADC_CTL_IE|ADC_CTL_END);
+    ADCSequenceEnable(ADC0_BASE, 3);
+    ADCIntClear(ADC0_BASE,3);
+    ADCIntRegister(ADC0_BASE,3,ADC_int_handler);
+    ADCIntEnable(ADC0_BASE,3);
+
+    while(1)
+    {
+
+    }
+}
+
+uint32_t Value=0;
+uint32_t test=0;
+// Interrupt handler
+void ADC_int_handler(void)
+{
+    ADCIntClear(ADC0_BASE, 3);  // delete interrupt flag
+    ADCProcessorTrigger(ADC0_BASE,3);   // Konvertierung beginnen
+    while(!ADCIntStatus(ADC0_BASE,3,false));    // warten bis Konvertierung abgeschlossen
+    ADCSequenceDataGet(ADC0_BASE,3,&Value); // Wert auslesen
+
+    //Die Summe von jeden 1000 Werten addieren
+    buffer_sample_sum=buffer_sample_sum+Value*Value-buffer_sample[i_sample];
+    buffer_sample[i_sample]=Value*Value;
+    //uint32_t Z1ahl=buffer_sample_sum-buffer_sample_sum/100000*100000;
+
+    //Nominierung der Summe, damit man mit 8 LEDs sehen kann
+    int i =0;
+    for (;i<256;i++)
+    {
+        if ((buffer_sample_sum-buffer_sample_sum/100000*100000)>=i*392)
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,i);
+        }
+    }
+
+    i_sample++;
+    if (i_sample==BUFFER_SIZE)
+    {
+        i_sample=0;
+    }
+}
