@@ -537,3 +537,152 @@ void main(void)
 
 //AUFGABE 7.2==========================================================================================================================
 
+#include<stdint.h>
+#include<stdbool.h>
+#include"math.h"
+#include"inc/hw_ints.h"
+#include"inc/hw_memmap.h"
+#include"inc/hw_types.h"
+#include"driverlib/gpio.h"
+#include"driverlib/sysctl.h"
+#include"driverlib/timer.h"
+#include"driverlib/adc.h"
+#include"driverlib/interrupt.h"
+#include"driverlib/fpu.h"
+
+uint32_t systemTime_ms;
+void InterruptHandlerTimer0A (void)
+{
+    //delete timer interrupt flag
+    TimerIntClear(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+    //add 1 to ms counter
+    systemTime_ms++;
+}
+
+void clockSetup(void)
+{
+    uint32_t timerPeriod;
+    //clock configure
+
+    SysCtlClockSet(SYSCTL_SYSDIV_5|SYSCTL_USE_PLL|SYSCTL_XTAL_16MHZ|SYSCTL_OSC_MAIN);
+    //activate Peripherie for timer
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_TIMER0);
+    //configure timer as 32 bit in periodic mode
+    TimerConfigure(TIMER0_BASE, TIMER_CFG_PERIODIC);
+    //set timerPeriod ....
+    timerPeriod = (SysCtlClockGet()/1000);
+    //
+    TimerLoadSet(TIMER0_BASE, TIMER_A, timerPeriod-1);
+    //
+    TimerIntRegister(TIMER0_BASE, TIMER_A, &(InterruptHandlerTimer0A));
+    //aktivie die Interrupt auf TIMER-0-A
+    IntEnable(INT_TIMER0A);
+    //erzeuge einen Interrupt, wenn TIMER-0-A ein timeout erzeugt
+    TimerIntEnable(TIMER0_BASE, TIMER_TIMA_TIMEOUT);
+    //alle Interrupt werden aktiviert
+    IntMasterEnable();
+    //starte das Zaehlen des Timers
+    TimerEnable(TIMER0_BASE, TIMER_A);
+}
+
+void delay_ms(uint32_t waitTime)
+{
+    uint32_t systemTime_ms1=systemTime_ms;
+    while(1)
+    {
+        if (systemTime_ms1==(systemTime_ms-waitTime))
+        {
+            break;
+        }
+    }
+}
+
+void main(void)
+{
+    //benutzen Fliesskommazahl
+    FPUEnable();
+    FPUStackingEnable();
+
+    clockSetup();
+    systemTime_ms=0;
+
+
+    // Peripherie ADC aktivieren
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_ADC0);
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOE);
+
+    SysCtlPeripheralEnable(SYSCTL_PERIPH_GPIOB);
+
+    GPIOPinTypeGPIOOutput(GPIO_PORTB_BASE, GPIO_PIN_0 | GPIO_PIN_1 | GPIO_PIN_2
+                          | GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5 | GPIO_PIN_6 | GPIO_PIN_7);
+
+    // PIN PE2 ADC Funktion zuweisen
+    GPIOPinTypeADC(GPIO_PORTE_BASE,GPIO_PIN_2);
+
+    // ADC konfigurieren
+    ADCSequenceConfigure(ADC0_BASE,1,ADC_TRIGGER_PROCESSOR,0);  // Prozessor als Trigger Quelle
+    ADCSequenceStepConfigure(ADC0_BASE,1,0,ADC_CTL_CH1|ADC_CTL_IE|ADC_CTL_END); // AI1 abtasten/Interrupt erzeugen bei Ende/letzter Schritt
+    ADCSequenceEnable(ADC0_BASE,1); // ADC Sequenz 1 aktivieren
+
+    uint32_t ui32ADC0Value;
+
+    float Widerstand;
+    //   float *p=&Widerstand;
+
+    while(1)
+    {
+        IntMasterDisable();
+
+        // Eingang abfragen
+        ADCIntClear(ADC0_BASE,1);       // evtl vorhandene ADC Interrupts loeschen
+        ADCProcessorTrigger(ADC0_BASE,1);   // Konvertierung beginnen
+        while(!ADCIntStatus(ADC0_BASE,1,false));    // warten bis Konvertierung abgeschlossen
+        ADCSequenceDataGet(ADC0_BASE,1,&ui32ADC0Value); // Wert auslesen
+
+        IntMasterEnable();
+        systemTime_ms=0;
+        clockSetup();
+
+        Widerstand =(1000.0/(4095.0/ui32ADC0Value-1));//Mit ADC Wert Widerstand ausrechnen
+
+        GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x00);
+        delay_ms(20);
+        if (Widerstand>100&&Widerstand<=200)
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x01);
+        }
+        else if(Widerstand>200&&Widerstand<=400)
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x02);
+        }
+        else if(Widerstand>400&&Widerstand<=800)
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x04);
+        }
+        else if(Widerstand>800&&Widerstand<=1200)
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x08);
+        }
+        else if(Widerstand>1200&&Widerstand<=2000)
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x10);
+        }
+        else if(Widerstand>2000&&Widerstand<=5000)
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x20);
+        }
+        else if(Widerstand>5000&&Widerstand<=11000)
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x40);
+        }
+        else if(Widerstand>11000&&Widerstand<=16000)
+        {
+            GPIOPinWrite(GPIO_PORTB_BASE,GPIO_PIN_0|GPIO_PIN_1|GPIO_PIN_2|GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5|GPIO_PIN_6|GPIO_PIN_7,0x80);
+        }
+
+        delay_ms(20);
+    }
+}
+
+
+
